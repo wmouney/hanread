@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HanRead Studio</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Main navigation">
+        <div class="brand">
+          <div class="brand-mark">汉</div>
+          <div>
+            <h1>HanRead</h1>
+            <p>Chinese reading studio</p>
+          </div>
+        </div>
+
+        <nav class="nav-tabs">
+          <button class="nav-tab active" data-view="library" type="button">Library</button>
+          <button class="nav-tab" data-view="reader" type="button">Reader</button>
+          <button class="nav-tab" data-view="review" type="button">Review</button>
+          <button class="nav-tab creator-only" data-view="creator" type="button">Creator</button>
+        </nav>
+
+        <section class="stats-panel" aria-label="Learning progress">
+          <div>
+            <span class="stat-label">Streak</span>
+            <strong id="streakStat">4 days</strong>
+          </div>
+          <div>
+            <span class="stat-label">Known words</span>
+            <strong id="knownStat">0</strong>
+          </div>
+          <div>
+            <span class="stat-label">Stories done</span>
+            <strong id="doneStat">0 / 4</strong>
+          </div>
+        </section>
+
+      </aside>
+
+      <main class="main-content">
+        <section id="libraryView" class="view active" aria-labelledby="libraryTitle">
+          <div class="topbar">
+            <div>
+              <p class="eyebrow">Continue learning</p>
+              <h2 id="libraryTitle">Read Chinese every day</h2>
+            </div>
+            <button id="continueButton" class="primary-button" type="button">Continue</button>
+          </div>
+
+          <section class="continue-panel">
+            <div>
+              <span id="continueLevel" class="level-pill">HSK 1</span>
+              <h3 id="continueTitle">Morning at the Market</h3>
+              <p id="continueSummary">Practice daily-life Chinese with a calm beginner story.</p>
+            </div>
+            <div class="progress-ring" aria-label="Current story progress">
+              <span id="continueProgress">25%</span>
+            </div>
+          </section>
+
+          <div class="section-heading">
+            <p class="eyebrow">All lessons</p>
+            <h3>Choose a reading</h3>
+          </div>
+
+          <div id="filters" class="filters" role="list" aria-label="Story filters"></div>
+
+          <div id="storyGrid" class="story-grid"></div>
+        </section>
+
+        <section id="readerView" class="view" aria-labelledby="readerTitle">
+          <div class="reader-header">
+            <button id="backToLibrary" class="ghost-button" type="button">Library</button>
+            <div>
+              <span id="readerLevel" class="level-pill">HSK 1</span>
+              <h2 id="readerTitle">Morning at the Market</h2>
+            </div>
+            <div class="reader-header-actions">
+              <button id="playStoryAudio" class="speaker-button" type="button" aria-label="Play lesson audio">
+                <svg viewBox="0 0 48 48" aria-hidden="true">
+                  <path d="M6 20v8h8l12 10V10L14 20H6z"></path>
+                  <path d="M32 17c3 3 3 11 0 14"></path>
+                  <path d="M37 11c7 7 7 19 0 26"></path>
+                </svg>
+              </button>
+              <button id="markComplete" class="secondary-button" type="button">Mark done</button>
+            </div>
+          </div>
+
+          <div class="reader-tools">
+            <div class="mode-switch" aria-label="Reading mode">
+              <button id="sentenceModeButton" class="tool-button active" type="button">Sentence</button>
+              <button id="lessonModeButton" class="tool-button" type="button">Lesson</button>
+            </div>
+            <label class="reader-toggle">
+              <span>Pinyin</span>
+              <input id="pinyinToggle" type="checkbox" checked />
+            </label>
+            <label class="reader-toggle">
+              <span>Translation</span>
+              <input id="translationToggle" type="checkbox" />
+            </label>
+            <label class="reader-toggle">
+              <span>Traditional</span>
+              <input id="traditionalToggle" type="checkbox" />
+            </label>
+            <label class="reader-rate">
+              <span>Speed <strong id="rateValue">0.70x</strong></span>
+              <input id="audioRate" type="range" min="0.55" max="1.05" step="0.01" value="0.70" />
+            </label>
+            <button id="prevSentence" class="icon-button" type="button" aria-label="Previous sentence">‹</button>
+            <button id="nextSentence" class="icon-button" type="button" aria-label="Next sentence">›</button>
+          </div>
+
+          <article id="readerText" class="reader-text"></article>
+          <div id="wordPopover" class="word-popover" hidden></div>
+        </section>
+
+        <section id="reviewView" class="view" aria-labelledby="reviewTitle">
+          <div class="topbar">
+            <div>
+              <p class="eyebrow">Vocabulary</p>
+              <h2 id="reviewTitle">Words saved from reading</h2>
+            </div>
+            <button id="clearReview" class="ghost-button" type="button">Clear list</button>
+          </div>
+          <div id="reviewList" class="review-list"></div>
+        </section>
+
+        <section id="creatorView" class="view" aria-labelledby="creatorTitle">
+          <div class="topbar">
+            <div>
+              <p class="eyebrow">Creator studio</p>
+              <h2 id="creatorTitle">Add your own Chinese reading</h2>
+            </div>
+          </div>
+
+          <form id="creatorForm" class="creator-form">
+            <div class="form-grid">
+              <label>
+                <span>Chinese title</span>
+                <input id="creatorTitleZh" type="text" value="我的中文故事" />
+              </label>
+              <label>
+                <span>English title</span>
+                <input id="creatorTitleEn" type="text" value="My Chinese Story" />
+              </label>
+              <label>
+                <span>Level</span>
+                <select id="creatorLevel"></select>
+              </label>
+            </div>
+            <label>
+              <span>Chinese text or prepared annotated text</span>
+              <textarea id="creatorText" rows="8">今天我去咖啡店学习中文。老板很友好。他给我一杯茶。我一边喝茶一边看书。</textarea>
+            </label>
+            <label>
+              <span>Cover image</span>
+              <input id="creatorImage" type="file" accept="image/png,image/jpeg,image/webp" />
+            </label>
+            <div id="creatorImagePreview" class="creator-image-preview"></div>
+            <label>
+              <span>Lesson audio</span>
+              <input id="creatorLessonAudio" type="file" accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/webm" />
+            </label>
+            <div id="creatorLessonAudioPreview" class="creator-audio-preview"></div>
+            <div class="creator-actions">
+              <button id="previewLessonButton" class="secondary-button" type="button">Preview & edit</button>
+              <button id="createLessonButton" class="primary-button" type="submit" disabled>Create final lesson</button>
+              <span id="creatorStatus" class="creator-status" aria-live="polite"></span>
+            </div>
+            <section class="ai-assist">
+              <div>
+                <p class="eyebrow">Prepared text</p>
+                <h3>Import your annotated lesson</h3>
+                <p class="form-hint">You can include levels: 小猫 (xiǎo māo - kitten / little cat - HSK1).</p>
+              </div>
+              <textarea id="preparedLessonText" rows="7" placeholder="小猫 (xiǎo māo - kitten / little cat) 是 (shì - is / to be) 小 (xiǎo - small / little) 动物 (dòngwù - animal)。&#10;The kitten is a small animal."></textarea>
+              <button id="importPreparedTextButton" class="secondary-button" type="button">Import prepared text</button>
+            </section>
+          </form>
+
+          <form id="levelForm" class="level-form">
+            <div>
+              <p class="eyebrow">Level manager</p>
+              <h3>Add a level for your students</h3>
+            </div>
+            <div class="level-row">
+              <label>
+                <span>Level name</span>
+                <input id="newLevelName" type="text" placeholder="Example: HSK 3, A1, Grade 5, Business" />
+              </label>
+              <button class="secondary-button" type="submit">Add level</button>
+            </div>
+            <div id="levelList" class="level-list"></div>
+          </form>
+
+          <section class="lesson-manager" aria-label="Lesson level organizer">
+            <div>
+              <p class="eyebrow">Lesson organizer</p>
+              <h3>Arrange lessons by level</h3>
+            </div>
+            <div id="lessonLevelList" class="lesson-level-list"></div>
+          </section>
+
+          <section class="publish-panel" aria-label="Publishing preparation">
+            <div>
+              <p class="eyebrow">Publishing</p>
+              <h3>Prepare student version</h3>
+              <p>Create a publish package with every lesson currently visible in your library.</p>
+            </div>
+            <div class="publish-actions">
+              <button id="copyPublishPackage" class="secondary-button" type="button">Copy publish package</button>
+              <button id="downloadPublishPackage" class="ghost-button" type="button">Download package</button>
+            </div>
+            <span id="publishStatus" class="creator-status" aria-live="polite"></span>
+          </section>
+
+          <div id="creatorPreview" class="creator-preview"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="published-data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
