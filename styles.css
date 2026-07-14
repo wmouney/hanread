@@ -1093,6 +1093,108 @@ button:hover {
   gap: 12px;
 }
 
+.embed-code-list {
+  display: grid;
+  gap: 12px;
+}
+
+.embed-code-list h3,
+.embed-code-list p {
+  margin: 0;
+}
+
+.embed-code-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(119, 93, 62, 0.16);
+  border-radius: 8px;
+  background: #fffaf0;
+  padding: 14px;
+}
+
+.embed-code-card strong,
+.embed-code-card span {
+  display: block;
+}
+
+.embed-code-card span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.embed-code-card textarea {
+  min-height: 76px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+}
+
+.embed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.embed-mode .sidebar {
+  display: none;
+}
+
+.embed-mode .app-shell {
+  display: block;
+  min-height: 100vh;
+}
+
+.embed-mode .main-content {
+  min-height: 100vh;
+  padding: 0;
+}
+
+.embed-mode #libraryView,
+.embed-mode #reviewView,
+.embed-mode .reader-header .ghost-button,
+.embed-mode #markComplete {
+  display: none;
+}
+
+.embed-mode #readerView {
+  display: grid;
+  padding: 18px;
+}
+
+.embed-mode .reader-header,
+.embed-mode .reader-tools,
+.embed-mode .reader-text {
+  max-width: 100%;
+}
+
+.embed-audio-fallback {
+  display: none;
+}
+
+.embed-mode .embed-audio-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0 18px 18px;
+  padding: 12px 14px;
+  border: 1px solid rgba(35, 117, 109, 0.18);
+  border-radius: 8px;
+  background: #f3fbf8;
+  color: var(--ink);
+}
+
+.embed-mode .embed-audio-fallback strong,
+.embed-mode .embed-audio-fallback span {
+  display: block;
+}
+
+.embed-mode .embed-audio-fallback span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 button:disabled {
   cursor: not-allowed;
   opacity: 0.6;

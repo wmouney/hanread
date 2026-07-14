@@ -269,10 +269,15 @@ const savedLevels = JSON.parse(localStorage.getItem("hanread-levels") || "null")
 let levels = Array.from(new Set([...(publishedData?.levels || defaultLevels), ...((savedLevels || []))]));
 let levelOverrides = JSON.parse(localStorage.getItem("hanread-level-overrides") || "{}");
 
+const urlParams = new URLSearchParams(window.location.search);
+const requestedLessonId = urlParams.get("lesson") || "";
+const embedMode = urlParams.get("embed") === "1";
+const creatorMode = urlParams.get("creator") === "1";
+
 const state = {
   view: "library",
   filter: "all",
-  storyId: localStorage.getItem("hanread-current-story") || "market",
+  storyId: requestedLessonId || localStorage.getItem("hanread-current-story") || "market",
   voiceName: localStorage.getItem("hanread-voice") || "",
   audioRate: Number(localStorage.getItem("hanread-audio-rate") || "0.70"),
   showPinyin: localStorage.getItem("hanread-pinyin") !== "false",
@@ -290,7 +295,6 @@ let creatorImageData = "";
 let creatorLessonAudioData = "";
 let editingStoryId = null;
 let activeAudio = null;
-const creatorMode = new URLSearchParams(window.location.search).get("creator") === "1";
 localStorage.removeItem("hanread-creator-mode");
 
 const $ = (selector) => document.querySelector(selector);
@@ -318,6 +322,19 @@ function lessonPartEntry(word) {
 
 function wordEntry(word) {
   return dictionary[word] || lessonPartEntry(word) || ["", "No definition yet", `${word}。`];
+}
+
+function wordAudioSource(word) {
+  for (const sentence of currentStory().sentences || []) {
+    const part = sentenceParts(sentence).find((item) => item.type === "word" && item.text === word && item.audio);
+    if (part?.audio) return part.audio;
+  }
+  return "";
+}
+
+function playWordAudio(word) {
+  const source = wordAudioSource(word);
+  playAudioSource(source, () => speakText(word, { rate: Math.max(0.68, state.audioRate - 0.08) }));
 }
 
 const hskWordLevels = {
@@ -601,6 +618,7 @@ function deleteLesson(storyId) {
   renderLevels();
   renderLibrary();
   renderReader();
+  renderEmbedCodes();
   $("#creatorPreview").innerHTML = `<div class="empty-state">Lesson deleted.</div>`;
 }
 
@@ -910,6 +928,7 @@ function speakStory() {
 }
 
 function setView(view) {
+  if (embedMode) view = "reader";
   if (view === "creator" && !creatorMode) view = "library";
   state.view = view;
   $$(".view").forEach((item) => item.classList.toggle("active", item.id === `${view}View`));
@@ -1001,6 +1020,17 @@ function renderLessonOrganizer() {
   });
 }
 
+function openStory(storyId, updateUrl = true) {
+  state.storyId = storyId;
+  state.sentenceIndex = 0;
+  save();
+  if (updateUrl && !embedMode && window.history?.replaceState) {
+    window.history.replaceState(null, "", lessonUrl({ id: storyId }, false));
+  }
+  renderReader();
+  setView("reader");
+}
+
 function renderLibrary() {
   const story = currentStory();
   $("#continueTitle").textContent = storyTitle(story);
@@ -1029,11 +1059,7 @@ function renderLibrary() {
 
   $$(".story-card").forEach((card) => {
     card.addEventListener("click", () => {
-      state.storyId = card.dataset.storyId;
-      state.sentenceIndex = 0;
-      save();
-      renderReader();
-      setView("reader");
+      openStory(card.dataset.storyId);
     });
   });
 }
@@ -1060,11 +1086,7 @@ function ensureLibraryLessons() {
 
   $$(".story-card").forEach((card) => {
     card.addEventListener("click", () => {
-      state.storyId = card.dataset.storyId;
-      state.sentenceIndex = 0;
-      save();
-      renderReader();
-      setView("reader");
+      openStory(card.dataset.storyId);
     });
   });
 }
@@ -1084,7 +1106,7 @@ function renderReader() {
         ${sentence.speaker ? `<div class="speaker-label speaker-${sentence.speaker.toLowerCase()}">${sentence.speaker}</div>` : ""}
         <div class="hanzi-line">
           ${sentenceParts(sentence).map((part) => part.type === "word" ? `
-              <button class="word ${wordLevelClass(part.text)}" type="button" data-word="${part.text}" data-level="${wordLevel(part.text)}">
+              <button class="word ${wordLevelClass(part.text)}" type="button" data-word="${part.text}" data-level="${wordLevel(part.text)}" data-sentence-index="${index}">
                 <ruby><rb>${renderWordText(part.text, repeatedSet)}</rb><rt>${state.showPinyin ? wordPinyin(part.text) : ""}</rt></ruby>
               </button>
             ` : `<span class="punctuation">${part.text}</span>`).join("")}
@@ -1111,11 +1133,22 @@ function renderReader() {
       playSentenceAudio(sentence);
     });
   });
+
+  const fallback = $("#embedAudioFallback");
+  if (fallback) {
+    fallback.innerHTML = embedMode ? `
+      <div>
+        <strong>Audio on Moodle mobile</strong>
+        <span>If sound is blocked in the Moodle app, open the lesson in your browser.</span>
+      </div>
+      <a class="secondary-button" href="${lessonUrl(story, false)}" target="_blank" rel="noopener">Open lesson</a>
+    ` : "";
+  }
 }
 
 function showWord(button) {
   const word = button.dataset.word;
-  speakText(word, { rate: Math.max(0.68, state.audioRate - 0.08) });
+  playWordAudio(word);
   const entry = wordEntry(word);
   const level = wordLevel(word);
   const isSaved = state.savedWords.some((item) => item.word === word);
@@ -1190,7 +1223,7 @@ function renderReview() {
     card.addEventListener("click", () => {
       const word = card.dataset.flipWord;
       if (!card.closest(".flashcard").classList.contains("is-flipped")) {
-        speakText(word, { rate: Math.max(0.68, state.audioRate - 0.08) });
+        playWordAudio(word);
       }
       card.closest(".flashcard").classList.toggle("is-flipped");
     });
@@ -1797,6 +1830,72 @@ function downloadPublishPackage() {
   status.textContent = "Publish package downloaded.";
 }
 
+function publicAppUrl() {
+  if (window.location.protocol === "file:") return "https://wmouney.github.io/hanread/";
+  return `${window.location.origin}${window.location.pathname}`;
+}
+
+function lessonUrl(story, embedded = false) {
+  const params = new URLSearchParams();
+  params.set("lesson", story.id);
+  if (embedded) params.set("embed", "1");
+  return `${publicAppUrl()}?${params.toString()}`;
+}
+
+function lessonEmbedCode(story) {
+  return `<iframe src="${lessonUrl(story, true)}" width="100%" height="720" style="border:0;border-radius:12px;" loading="lazy" allow="autoplay; clipboard-write" title="${storyTitle(story)}"></iframe>`;
+}
+
+async function copyText(text, statusMessage) {
+  try {
+    await navigator.clipboard.writeText(text);
+    const status = $("#publishStatus");
+    if (status) status.textContent = statusMessage;
+  } catch {
+    const status = $("#publishStatus");
+    if (status) status.textContent = "Clipboard blocked. Select and copy the code manually.";
+  }
+}
+
+function renderEmbedCodes() {
+  const container = $("#embedCodeList");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div>
+      <p class="eyebrow">Moodle embeds</p>
+      <h3>Embed a single lesson</h3>
+    </div>
+    ${stories.map((story) => `
+      <article class="embed-code-card">
+        <div>
+          <strong>${storyTitle(story)}</strong>
+          <span>${story.level} · ${story.sentences.length} sentences</span>
+        </div>
+        <textarea readonly>${lessonEmbedCode(story)}</textarea>
+        <div class="embed-actions">
+          <button class="secondary-button copy-embed-code" type="button" data-story-id="${story.id}">Copy embed code</button>
+          <button class="ghost-button copy-lesson-link" type="button" data-story-id="${story.id}">Copy lesson link</button>
+        </div>
+      </article>
+    `).join("")}
+  `;
+
+  $$(".copy-embed-code").forEach((button) => {
+    button.addEventListener("click", () => {
+      const story = stories.find((item) => item.id === button.dataset.storyId);
+      if (story) copyText(lessonEmbedCode(story), `Embed code copied for ${storyTitle(story)}.`);
+    });
+  });
+
+  $$(".copy-lesson-link").forEach((button) => {
+    button.addEventListener("click", () => {
+      const story = stories.find((item) => item.id === button.dataset.storyId);
+      if (story) copyText(lessonUrl(story), `Lesson link copied for ${storyTitle(story)}.`);
+    });
+  });
+}
+
 async function copyAiPrompt() {
   const status = $("#creatorStatus");
   const prompt = buildAiPrompt();
@@ -1905,6 +2004,7 @@ async function createLesson(event) {
     renderLevels();
     renderLibrary();
     renderReader();
+    renderEmbedCodes();
     status.textContent = "This lesson already exists. Opened the existing copy.";
     $("#creatorPreview").innerHTML = `
       <article class="creator-success">
@@ -1964,6 +2064,7 @@ async function createLesson(event) {
   renderLibrary();
   ensureLibraryLessons();
   renderReader();
+  renderEmbedCodes();
   $("#creatorPreview").innerHTML = `
     <article class="creator-success">
       <img src="${story.image}" alt="" />
@@ -2073,7 +2174,15 @@ function bindEvents() {
 
 function init() {
   refreshStories();
+  if (requestedLessonId && stories.some((story) => story.id === requestedLessonId)) {
+    state.storyId = requestedLessonId;
+  }
+  if (embedMode) {
+    state.view = "reader";
+    state.sentenceMode = false;
+  }
   document.body.classList.toggle("creator-mode", creatorMode);
+  document.body.classList.toggle("embed-mode", embedMode);
   if (!creatorMode) {
     if (state.view === "creator") state.view = "library";
     document.querySelector('[data-view="creator"]')?.remove();
@@ -2091,6 +2200,7 @@ function init() {
   ensureLibraryLessons();
   renderReader();
   renderReview();
+  if (creatorMode) renderEmbedCodes();
   loadVoices();
   if ("speechSynthesis" in window) speechSynthesis.addEventListener("voiceschanged", loadVoices);
 }

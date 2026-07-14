@@ -593,21 +593,24 @@ window.HANREAD_PUBLISHED_DATA = {
               "text": "小猫",
               "pinyin": "xiǎo māo",
               "meaning": "kitten / little cat",
-              "level": "New"
+              "level": "New",
+              "audio": "assets/audio/xiaomao-story/words/xiaomao.mp3"
             },
             {
               "type": "word",
               "text": "是",
               "pinyin": "shì",
               "meaning": "is / to be",
-              "level": "HSK1"
+              "level": "HSK1",
+              "audio": "assets/audio/xiaomao-story/words/shi.mp3"
             },
             {
               "type": "word",
               "text": "小",
               "pinyin": "xiǎo",
               "meaning": "small / little",
-              "level": "New"
+              "level": "New",
+              "audio": "assets/audio/xiaomao-story/words/xiao.mp3"
             },
             {
               "type": "word",
@@ -623,7 +626,8 @@ window.HANREAD_PUBLISHED_DATA = {
           ],
           "punctuation": "。",
           "pinyin": "xiǎo māo shì xiǎo dòngwù",
-          "en": "The kitten is a small animal."
+          "en": "The kitten is a small animal.",
+          "audio": "assets/audio/xiaomao-story/s01.mp3"
         },
         {
           "zh": [
@@ -637,21 +641,24 @@ window.HANREAD_PUBLISHED_DATA = {
               "text": "小猫",
               "pinyin": "xiǎo māo",
               "meaning": "kitten / little cat",
-              "level": "New"
+              "level": "New",
+              "audio": "assets/audio/xiaomao-story/words/xiaomao.mp3"
             },
             {
               "type": "word",
               "text": "很",
               "pinyin": "hěn",
               "meaning": "very / quite",
-              "level": "HSK1"
+              "level": "HSK1",
+              "audio": "assets/audio/xiaomao-story/words/hen.mp3"
             },
             {
               "type": "word",
               "text": "小",
               "pinyin": "xiǎo",
               "meaning": "small / little",
-              "level": "New"
+              "level": "New",
+              "audio": "assets/audio/xiaomao-story/words/xiao.mp3"
             },
             {
               "type": "punctuation",
@@ -660,9 +667,11 @@ window.HANREAD_PUBLISHED_DATA = {
           ],
           "punctuation": "。",
           "pinyin": "xiǎo māo hěn xiǎo",
-          "en": "The kitten is very small."
+          "en": "The kitten is very small.",
+          "audio": "assets/audio/xiaomao-story/s02.mp3"
         }
-      ]
+      ],
+      "audio": {}
     },
     {
       "id": "custom-1778620450706",
